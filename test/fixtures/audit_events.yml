@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  workspace: one
+  action: MyString
+  target_type: MyString
+  target_id: 
+  payload: 
+  ip_address: MyString
+  user_agent: MyString
+
+two:
+  workspace: two
+  action: MyString
+  target_type: MyString
+  target_id: 
+  payload: 
+  ip_address: MyString
+  user_agent: MyString

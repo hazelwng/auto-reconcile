@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  match: one
+  reconcilable_item: one
+  side: MyString
+  allocated_amount_cents: 
+  allocated_currency: MyString
+
+two:
+  match: two
+  reconcilable_item: two
+  side: MyString
+  allocated_amount_cents: 
+  allocated_currency: MyString

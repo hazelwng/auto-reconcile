@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  reconciliation_run: one
+  reconcilable_item: one
+  workspace: one
+  category: MyString
+  llm_explanation: MyText
+  resolved_at: 2026-05-13 14:44:50
+  resolution: MyString
+
+two:
+  reconciliation_run: two
+  reconcilable_item: two
+  workspace: two
+  category: MyString
+  llm_explanation: MyText
+  resolved_at: 2026-05-13 14:44:50
+  resolution: MyString

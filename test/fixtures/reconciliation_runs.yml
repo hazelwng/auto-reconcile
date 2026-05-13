@@ -1,0 +1,25 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  workspace: one
+  source_a_id: 
+  source_b_id: 
+  date_range_start: 2026-05-13
+  date_range_end: 2026-05-13
+  status: MyString
+  stats: 
+  started_at: 2026-05-13 14:44:48
+  completed_at: 2026-05-13 14:44:48
+  error_message: MyText
+
+two:
+  workspace: two
+  source_a_id: 
+  source_b_id: 
+  date_range_start: 2026-05-13
+  date_range_end: 2026-05-13
+  status: MyString
+  stats: 
+  started_at: 2026-05-13 14:44:48
+  completed_at: 2026-05-13 14:44:48
+  error_message: MyText
