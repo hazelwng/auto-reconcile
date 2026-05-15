@@ -1,9 +1,31 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
+# Phase 1a seed: 1 user, 1 workspace, 1 membership, 2 data sources.
+# Idempotent — safe to rerun.
+
+user = User.find_or_create_by!(email: "hazel@example.com") do |u|
+  u.name = "Hazel"
+end
+
+workspace = Workspace.find_or_create_by!(slug: "demo-co") do |w|
+  w.name = "Demo Co"
+  w.base_currency = "AUD"
+  w.settings = {}
+end
+
+Membership.find_or_create_by!(workspace: workspace, user: user) do |m|
+  m.role = "owner"
+end
+
+DataSource.find_or_create_by!(workspace: workspace, name: "Demo Bank") do |ds|
+  ds.kind = "bank"
+  ds.currency = "AUD"
+  ds.schema_mapping = {}
+end
+
+DataSource.find_or_create_by!(workspace: workspace, name: "Demo Invoices") do |ds|
+  ds.kind = "accounting"
+  ds.currency = "AUD"
+  ds.schema_mapping = {}
+end
+
+puts "Seeded: #{User.count} user, #{Workspace.count} workspace, " \
+     "#{Membership.count} membership, #{DataSource.count} data sources"

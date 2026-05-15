@@ -95,7 +95,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_13_045309) do
     t.bigint "data_source_id", null: false
     t.integer "duplicate_count", default: 0, null: false
     t.integer "error_count", default: 0, null: false
-    t.jsonb "error_log", default: {}, null: false
+    t.jsonb "error_log", default: [], null: false
     t.integer "processed_count", default: 0, null: false
     t.integer "row_count", default: 0, null: false
     t.datetime "started_at"

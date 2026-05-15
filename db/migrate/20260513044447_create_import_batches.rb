@@ -9,7 +9,7 @@ class CreateImportBatches < ActiveRecord::Migration[8.1]
       t.integer :success_count, null: false, default: 0
       t.integer :error_count, null: false, default: 0
       t.integer :duplicate_count, null: false, default: 0
-      t.jsonb :error_log, null: false, default: {}
+      t.jsonb :error_log, null: false, default: []
       t.datetime :started_at
       t.datetime :completed_at
 

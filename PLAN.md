@@ -32,6 +32,34 @@ Build order:
    delegated_type ✓
 5. Seed: 1 user, 1 workspace, 1 membership, 2 data sources
 6. Importers: `Importers::Base` + `Importers::FixedCsv`, `ImportBatchJob`
+   - **`Importers::Base` owns the lifecycle** (Template Method): sets
+     `started_at` / `completed_at`, flips `status`
+     `queued → processing → complete/failed`, increments
+     `processed_count` / `success_count` / `error_count` /
+     `duplicate_count`, appends to `error_log`. Subclasses override
+     only `iter_rows(batch)` and `import_row(batch, row, row_number)`.
+   - **`error_log` shape is fixed** — array of row-level hashes:
+     `[{ row_number:, external_id:, error:, raw_row: }, ...]`. Same
+     shape across all importers so the UI / debugging doesn't branch.
+   - **Duplicates are expected, not errors.** Rescue
+     `ActiveRecord::RecordNotUnique` from the
+     `(data_source_id, external_id_hash)` index, increment
+     `duplicate_count`, continue. DB constraint stays the final
+     authority; `error_log` only collects real errors.
+   - **Idempotent on retry.** SolidQueue may re-run `ImportBatchJob`.
+     Policy: re-process every row; the unique index turns previously
+     imported rows into `duplicate_count++`. No resume cursor, no
+     wipe-and-reimport.
+   - **Importer owns the kind → subtype mapping**, not the job.
+     `Importers::FixedCsv` reads `batch.data_source.kind` and picks
+     `BankTransaction` vs `Invoice`. `ImportBatchJob` only chooses the
+     strategy (`FixedCsv` in v1a; `LlmInferred` later).
+   - **Watch:** `Invoice.invoice_number` is unique per workspace, but
+     the `ReconcilableItem` dedupe key is per data_source. Two
+     accounting sources in the same workspace with the same invoice
+     number will collide on the invoice constraint even though the
+     dedupe keys differ. Acceptable in v1a (single accounting source);
+     revisit if/when a second one appears.
 7. Matchers: `Matchers::ExactMatcher`, `ReconciliationRunJob`
 8. Controllers, routes, Hotwire views
 9. Sample CSV fixtures
