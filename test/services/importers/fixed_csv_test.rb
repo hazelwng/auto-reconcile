@@ -19,7 +19,8 @@ module Importers
       end
 
       ri = ReconcilableItem.order(:id).last
-      assert_equal 123_456, ri.amount_cents
+      # Sign convention: debit (money out) -> negative.
+      assert_equal(-123_456, ri.amount_cents)
       assert_equal "AUD", ri.amount_currency
       assert_equal Date.new(2026, 4, 1), ri.occurred_on
       assert_equal "b-001", ri.external_id
@@ -34,6 +35,26 @@ module Importers
       @bank_batch.reload
       assert_equal "complete", @bank_batch.status
       assert_equal 1, @bank_batch.success_count
+    end
+
+    test "bank sign convention: credit -> positive, debit -> negative, regardless of input sign" do
+      attach_csv(@bank_batch, <<~CSV)
+        external_id,posted_date,amount,txn_type
+        b-credit,2026-04-01,100.00,credit
+        b-debit,2026-04-02,250.00,debit
+        b-credit-neg,2026-04-03,-100.00,credit
+        b-debit-neg,2026-04-04,-250.00,debit
+      CSV
+
+      FixedCsv.new(@bank_batch).call
+
+      rows = ReconcilableItem.order(:id).pluck(:external_id, :amount_cents).to_h
+      assert_equal({
+        "b-credit"     => 10_000,
+        "b-debit"      => -25_000,
+        "b-credit-neg" => 10_000,
+        "b-debit-neg"  => -25_000
+      }, rows)
     end
 
     test "accounting kind: creates Invoice + ReconcilableItem with parsed fields" do
@@ -70,7 +91,8 @@ module Importers
       FixedCsv.new(@bank_batch).call
 
       amounts = ReconcilableItem.order(:id).pluck(:amount_cents)
-      assert_equal [ 123_456, 200_000 ], amounts
+      # b-001 is a debit -> negative; b-002 is a credit -> positive.
+      assert_equal [ -123_456, 200_000 ], amounts
     end
 
     test "row currency overrides data_source currency when present" do

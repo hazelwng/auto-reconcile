@@ -23,7 +23,9 @@ module Importers
       workspace = batch.data_source.workspace
       external_id = row.fetch("external_id")
       external_id_hash = hash_external_id(external_id)
-      amount_cents = to_cents(row.fetch("amount"))
+      txn_type = row.fetch("txn_type").to_s.downcase
+      amount_cents = to_cents(row.fetch("amount")).abs
+      amount_cents = -amount_cents if txn_type == "debit"
       currency = (row["currency"].presence || batch.data_source.currency).upcase
       raise ActiveRecord::RecordNotUnique if duplicate?(batch, external_id_hash)
 
@@ -31,7 +33,7 @@ module Importers
         bank_txn = BankTransaction.create!(
           workspace: workspace,
           posted_date: Date.parse(row.fetch("posted_date")),
-          txn_type: row.fetch("txn_type").to_s.downcase,
+          txn_type: txn_type,
           counterparty: row["counterparty"],
           memo: row["memo"],
           check_number: row["check_number"],
