@@ -1,15 +1,21 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+queued_bank:
+  data_source: demo_bank
+  user: hazel
+  status: queued
+  row_count: 0
+  processed_count: 0
+  success_count: 0
+  error_count: 0
+  duplicate_count: 0
+  error_log: "[]"
 
-one:
-  data_source: one
-  status: MyString
-  row_count: 1
-  error_count: 1
-  error_log: 
-
-two:
-  data_source: two
-  status: MyString
-  row_count: 1
-  error_count: 1
-  error_log: 
+queued_invoices:
+  data_source: demo_invoices
+  user: hazel
+  status: queued
+  row_count: 0
+  processed_count: 0
+  success_count: 0
+  error_count: 0
+  duplicate_count: 0
+  error_log: "[]"

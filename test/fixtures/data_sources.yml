@@ -1,19 +1,13 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+demo_bank:
+  workspace: demo
+  name: Demo Bank
+  kind: bank
+  currency: AUD
+  schema_mapping: {}
 
-one:
-  workspace: one
-  name: MyString
-  kind: MyString
-  currency: MyString
-  schema_mapping: 
-  last_synced_at: 2026-05-13 14:44:46
-  discarded_at: 2026-05-13 14:44:46
-
-two:
-  workspace: two
-  name: MyString
-  kind: MyString
-  currency: MyString
-  schema_mapping: 
-  last_synced_at: 2026-05-13 14:44:46
-  discarded_at: 2026-05-13 14:44:46
+demo_invoices:
+  workspace: demo
+  name: Demo Invoices
+  kind: accounting
+  currency: AUD
+  schema_mapping: {}
