@@ -1,0 +1,21 @@
+queued_bank:
+  data_source: demo_bank
+  user: hazel
+  status: queued
+  row_count: 0
+  processed_count: 0
+  success_count: 0
+  error_count: 0
+  duplicate_count: 0
+  error_log: "[]"
+
+queued_invoices:
+  data_source: demo_invoices
+  user: hazel
+  status: queued
+  row_count: 0
+  processed_count: 0
+  success_count: 0
+  error_count: 0
+  duplicate_count: 0
+  error_log: "[]"

@@ -1,0 +1,13 @@
+demo_bank:
+  workspace: demo
+  name: Demo Bank
+  kind: bank
+  currency: AUD
+  schema_mapping: {}
+
+demo_invoices:
+  workspace: demo
+  name: Demo Invoices
+  kind: accounting
+  currency: AUD
+  schema_mapping: {}
