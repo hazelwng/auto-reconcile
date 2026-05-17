@@ -11,6 +11,7 @@ Rails.application.routes.draw do
 
   resources :data_sources, only: [ :index, :edit, :update ]
   resources :import_batches, only: [ :new, :create, :show ]
+  resources :reconciliation_runs, only: [ :new, :create, :show ]
 
   root "data_sources#index"
 end
