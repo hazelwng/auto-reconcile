@@ -1,0 +1,59 @@
+<% content_for :title, "Edit #{@data_source.name}" %>
+
+<div class="w-full max-w-3xl">
+  <h1 class="text-2xl font-semibold mb-4">Edit data source: <%= @data_source.name %></h1>
+
+  <% if flash[:alert].present? %>
+    <div class="mb-4 p-3 bg-red-50 text-red-800 rounded"><%= flash[:alert] %></div>
+  <% end %>
+
+  <% if @data_source.errors.any? %>
+    <div class="mb-4 p-3 bg-red-50 text-red-800 rounded">
+      <ul class="list-disc pl-5">
+        <% @data_source.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= form_with model: @data_source, local: true, class: "space-y-4" do |f| %>
+    <div>
+      <%= f.label :name, class: "block text-sm font-medium" %>
+      <%= f.text_field :name, class: "mt-1 block w-full border rounded px-3 py-2" %>
+    </div>
+
+    <div>
+      <%= f.label :kind, class: "block text-sm font-medium" %>
+      <%= f.select :kind, [ "bank", "accounting" ], {}, class: "mt-1 block w-full border rounded px-3 py-2" %>
+    </div>
+
+    <div>
+      <%= f.label :currency, class: "block text-sm font-medium" %>
+      <%= f.text_field :currency, class: "mt-1 block w-full border rounded px-3 py-2 uppercase" %>
+    </div>
+
+    <div>
+      <%= f.label :schema_mapping_json, "Schema mapping (JSON)", class: "block text-sm font-medium" %>
+      <p class="text-xs text-gray-600 mt-1 mb-2">
+        Leave empty to use the fixed canonical CSV schema. Otherwise, map canonical
+        field names (left) to your CSV's header text (right). Bank example:
+      </p>
+      <pre class="text-xs bg-gray-50 p-2 rounded mb-2 overflow-x-auto">{
+  "external_id": "Reference",
+  "amount": "Net Amount",
+  "txn_type": "Type",
+  "posted_date": "Date",
+  "counterparty": "Description"
+}</pre>
+      <%= f.text_area :schema_mapping_json, value: @schema_mapping_json,
+            rows: 14,
+            class: "mt-1 block w-full border rounded px-3 py-2 font-mono text-sm" %>
+    </div>
+
+    <div class="flex gap-3">
+      <%= f.submit "Save", class: "px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" %>
+      <%= link_to "Cancel", data_sources_path, class: "px-4 py-2 border rounded hover:bg-gray-50" %>
+    </div>
+  <% end %>
+</div>

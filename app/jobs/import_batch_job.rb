@@ -8,7 +8,13 @@ class ImportBatchJob < ApplicationJob
 
   private
 
-  def importer_for(_batch)
-    Importers::FixedCsv
+  # Empty jsonb (`{}`) is `blank?` in Rails, so `.present?` correctly
+  # selects MappedCsv only when the user has configured a non-empty mapping.
+  def importer_for(batch)
+    if batch.data_source.schema_mapping.present?
+      Importers::MappedCsv
+    else
+      Importers::FixedCsv
+    end
   end
 end

@@ -1,0 +1,40 @@
+<% content_for :title, "Data Sources" %>
+
+<div class="w-full">
+  <h1 class="text-2xl font-semibold mb-6">Data Sources</h1>
+
+  <% if flash[:notice].present? %>
+    <div class="mb-4 p-3 bg-green-50 text-green-800 rounded"><%= flash[:notice] %></div>
+  <% end %>
+
+  <table class="w-full text-left border-collapse">
+    <thead>
+      <tr class="border-b">
+        <th class="py-2 pr-4">Name</th>
+        <th class="py-2 pr-4">Kind</th>
+        <th class="py-2 pr-4">Currency</th>
+        <th class="py-2 pr-4">Schema mapping</th>
+        <th class="py-2"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @data_sources.each do |ds| %>
+        <tr class="border-b">
+          <td class="py-2 pr-4"><%= ds.name %></td>
+          <td class="py-2 pr-4"><%= ds.kind %></td>
+          <td class="py-2 pr-4"><%= ds.currency %></td>
+          <td class="py-2 pr-4">
+            <% if ds.schema_mapping.present? %>
+              <span class="text-sm text-gray-700">mapped (<%= ds.schema_mapping.keys.length %> fields)</span>
+            <% else %>
+              <span class="text-sm text-gray-500">none — uses fixed CSV schema</span>
+            <% end %>
+          </td>
+          <td class="py-2">
+            <%= link_to "Edit", edit_data_source_path(ds), class: "text-blue-600 hover:underline" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
