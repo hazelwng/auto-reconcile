@@ -1,0 +1,148 @@
+<% content_for :title, "Reconciliation run ##{@reconciliation_run.id}" %>
+
+<% if %w[queued running].include?(@reconciliation_run.status) %>
+  <% content_for :head do %>
+    <meta http-equiv="refresh" content="2">
+  <% end %>
+<% end %>
+
+<div class="w-full max-w-4xl">
+  <h1 class="text-2xl font-semibold mb-2">Reconciliation run #<%= @reconciliation_run.id %></h1>
+  <p class="text-sm text-gray-600 mb-4">
+    <strong><%= @reconciliation_run.source_a.name %></strong> (accounting)
+    →
+    <strong><%= @reconciliation_run.source_b.name %></strong> (bank)
+    &middot;
+    <%= @reconciliation_run.date_range_start %> to <%= @reconciliation_run.date_range_end %>
+  </p>
+
+  <% if flash[:notice].present? %>
+    <div class="mb-4 p-3 bg-green-50 text-green-800 rounded"><%= flash[:notice] %></div>
+  <% end %>
+
+  <div class="mb-6">
+    <h2 class="text-lg font-medium mb-2">Status</h2>
+    <p>
+      <span class="px-2 py-1 text-xs rounded
+        <%= { 'queued' => 'bg-gray-200', 'running' => 'bg-yellow-100',
+              'complete' => 'bg-green-100', 'failed' => 'bg-red-100' }[@reconciliation_run.status] %>">
+        <%= @reconciliation_run.status %>
+      </span>
+      <% if @reconciliation_run.started_at %>
+        &nbsp;started <%= @reconciliation_run.started_at.iso8601 %>
+      <% end %>
+      <% if @reconciliation_run.completed_at %>
+        &nbsp;completed <%= @reconciliation_run.completed_at.iso8601 %>
+      <% end %>
+    </p>
+    <% if @reconciliation_run.error_message.present? %>
+      <pre class="mt-2 p-3 bg-red-50 text-red-800 rounded text-xs font-mono whitespace-pre-wrap"><%= @reconciliation_run.error_message %></pre>
+    <% end %>
+  </div>
+
+  <% if @reconciliation_run.stats.present? %>
+    <div class="mb-6">
+      <h2 class="text-lg font-medium mb-2">Stats</h2>
+      <table class="w-full text-left border-collapse">
+        <tbody>
+          <% %w[source_a_in_window candidates_evaluated matches_created
+                ambiguity_groups_created exceptions_created
+                source_a_matched source_a_exceptions source_a_unmatched].each do |key| %>
+            <% next unless @reconciliation_run.stats.key?(key) %>
+            <tr class="border-b">
+              <td class="py-1 pr-4"><%= key.tr("_", " ").capitalize %></td>
+              <td><%= @reconciliation_run.stats[key] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+
+  <% if @matches.any? %>
+    <div class="mb-6">
+      <h2 class="text-lg font-medium mb-2">Matches (<%= @matches.length %>)</h2>
+      <table class="w-full text-left border-collapse text-sm">
+        <thead>
+          <tr class="border-b">
+            <th class="py-2 pr-4">#</th>
+            <th class="py-2 pr-4">Method</th>
+            <th class="py-2 pr-4">Status</th>
+            <th class="py-2 pr-4">Confidence</th>
+            <th class="py-2 pr-4">Legs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @matches.each do |match| %>
+            <tr class="border-b align-top">
+              <td class="py-2 pr-4"><%= match.id %></td>
+              <td class="py-2 pr-4"><%= match.method %></td>
+              <td class="py-2 pr-4"><%= match.status %></td>
+              <td class="py-2 pr-4"><%= match.confidence %></td>
+              <td class="py-2 pr-4">
+                <% match.match_legs.sort_by(&:side).each do |leg| %>
+                  <div class="font-mono text-xs">
+                    <span class="inline-block w-6 text-gray-500"><%= leg.side.upcase %>:</span>
+                    <%= leg.reconcilable_item.data_source.name %>
+                    &middot; <%= leg.reconcilable_item.occurred_on %>
+                    &middot; <%= leg.reconcilable_item.external_id %>
+                    &middot; <%= leg.allocated_currency %> <%= format("%.2f", leg.allocated_amount_cents / 100.0) %>
+                  </div>
+                <% end %>
+                <% if match.reasoning.present? %>
+                  <div class="text-xs text-gray-600 mt-1"><%= match.reasoning %></div>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+
+  <% if @exceptions.any? %>
+    <div class="mb-6">
+      <h2 class="text-lg font-medium mb-2">Exceptions (<%= @exceptions.length %>)</h2>
+      <table class="w-full text-left border-collapse text-sm">
+        <thead>
+          <tr class="border-b">
+            <th class="py-2 pr-4">Item</th>
+            <th class="py-2 pr-4">Source</th>
+            <th class="py-2 pr-4">Category</th>
+            <th class="py-2 pr-4">Reason</th>
+            <th class="py-2 pr-4">Group</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @exceptions.each do |ex| %>
+            <tr class="border-b">
+              <td class="py-2 pr-4 font-mono text-xs">
+                <%= ex.reconcilable_item.external_id %><br>
+                <span class="text-gray-500">
+                  <%= ex.reconcilable_item.occurred_on %> ·
+                  <%= ex.reconcilable_item.amount_currency %>
+                  <%= format("%.2f", ex.reconcilable_item.amount_cents.abs / 100.0) %>
+                </span>
+              </td>
+              <td class="py-2 pr-4"><%= ex.reconcilable_item.data_source.name %></td>
+              <td class="py-2 pr-4"><%= ex.category %></td>
+              <td class="py-2 pr-4 text-xs"><%= ex.metadata["reason"] %></td>
+              <td class="py-2 pr-4 font-mono text-xs text-gray-500">
+                <%= ex.metadata["group_key"]&.first(8) %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+
+  <% if @matches.empty? && @exceptions.empty? && @reconciliation_run.status == "complete" %>
+    <p class="text-gray-600 italic">No matches or exceptions produced. Likely no invoices fell within the date range, or there were no candidate bank transactions.</p>
+  <% end %>
+
+  <div class="flex gap-3 mt-6">
+    <%= link_to "Back to data sources", data_sources_path, class: "px-4 py-2 border rounded hover:bg-gray-50" %>
+    <%= link_to "New run", new_reconciliation_run_path, class: "px-4 py-2 border rounded hover:bg-gray-50" %>
+  </div>
+</div>

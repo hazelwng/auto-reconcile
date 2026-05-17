@@ -23,8 +23,18 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
+  <body class="bg-gray-50">
+    <nav class="bg-white border-b shadow-sm">
+      <div class="container mx-auto px-5 py-3 flex items-center gap-6">
+        <%= link_to "Auto Reconcile", root_path, class: "font-semibold text-gray-900" %>
+        <div class="flex gap-4 text-sm">
+          <%= link_to "Data sources", data_sources_path, class: "text-gray-700 hover:text-blue-600" %>
+          <%= link_to "Import CSV", new_import_batch_path, class: "text-gray-700 hover:text-blue-600" %>
+          <%= link_to "Run reconciliation", new_reconciliation_run_path, class: "text-gray-700 hover:text-blue-600" %>
+        </div>
+      </div>
+    </nav>
+    <main class="container mx-auto mt-8 px-5 flex">
       <%= yield %>
     </main>
   </body>

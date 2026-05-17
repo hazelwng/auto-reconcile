@@ -1,0 +1,57 @@
+<% content_for :title, "New reconciliation run" %>
+
+<div class="w-full max-w-2xl">
+  <h1 class="text-2xl font-semibold mb-4">Run reconciliation</h1>
+
+  <% if @reconciliation_run.errors.any? %>
+    <div class="mb-4 p-3 bg-red-50 text-red-800 rounded">
+      <ul class="list-disc pl-5">
+        <% @reconciliation_run.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <% if @accounting_sources.empty? || @bank_sources.empty? %>
+    <div class="mb-4 p-3 bg-yellow-50 text-yellow-900 rounded">
+      You need at least one <strong>accounting</strong> source and one <strong>bank</strong> source.
+      <%= link_to "Manage data sources", data_sources_path, class: "underline" %>.
+    </div>
+  <% end %>
+
+  <%= form_with model: @reconciliation_run, local: true, class: "space-y-4" do |f| %>
+    <div>
+      <%= f.label :source_a_id, "Accounting source (A)", class: "block text-sm font-medium" %>
+      <%= f.collection_select :source_a_id, @accounting_sources, :id, :name,
+            { include_blank: "— select an accounting source —" },
+            class: "mt-1 block w-full border rounded px-3 py-2" %>
+    </div>
+
+    <div>
+      <%= f.label :source_b_id, "Bank source (B)", class: "block text-sm font-medium" %>
+      <%= f.collection_select :source_b_id, @bank_sources, :id, :name,
+            { include_blank: "— select a bank source —" },
+            class: "mt-1 block w-full border rounded px-3 py-2" %>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <%= f.label :date_range_start, "Start date", class: "block text-sm font-medium" %>
+        <%= f.date_field :date_range_start, class: "mt-1 block w-full border rounded px-3 py-2" %>
+      </div>
+      <div>
+        <%= f.label :date_range_end, "End date", class: "block text-sm font-medium" %>
+        <%= f.date_field :date_range_end, class: "mt-1 block w-full border rounded px-3 py-2" %>
+      </div>
+    </div>
+    <p class="text-xs text-gray-600">
+      Invoices within this date range are matched against bank transactions within 7 days after each invoice's date.
+    </p>
+
+    <div class="flex gap-3">
+      <%= f.submit "Run reconciliation", class: "px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" %>
+      <%= link_to "Cancel", data_sources_path, class: "px-4 py-2 border rounded hover:bg-gray-50" %>
+    </div>
+  <% end %>
+</div>

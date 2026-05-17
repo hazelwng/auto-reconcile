@@ -1,0 +1,36 @@
+<% content_for :title, "Import CSV" %>
+
+<div class="w-full max-w-2xl">
+  <h1 class="text-2xl font-semibold mb-4">Import a CSV</h1>
+
+  <% if @import_batch.errors.any? %>
+    <div class="mb-4 p-3 bg-red-50 text-red-800 rounded">
+      <ul class="list-disc pl-5">
+        <% @import_batch.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= form_with model: @import_batch, local: true, multipart: true, class: "space-y-4" do |f| %>
+    <div>
+      <%= f.label :data_source_id, "Data source", class: "block text-sm font-medium" %>
+      <%= f.collection_select :data_source_id, @data_sources, :id,
+            ->(ds) { "#{ds.name} (#{ds.kind})" },
+            { include_blank: "— select a data source —" },
+            class: "mt-1 block w-full border rounded px-3 py-2" %>
+    </div>
+
+    <div>
+      <%= f.label :source_file, "CSV file", class: "block text-sm font-medium" %>
+      <%= f.file_field :source_file, accept: ".csv,text/csv",
+            class: "mt-1 block w-full border rounded px-3 py-2" %>
+    </div>
+
+    <div class="flex gap-3">
+      <%= f.submit "Upload & queue", class: "px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" %>
+      <%= link_to "Cancel", data_sources_path, class: "px-4 py-2 border rounded hover:bg-gray-50" %>
+    </div>
+  <% end %>
+</div>
