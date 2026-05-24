@@ -21,21 +21,8 @@ default: &default
 
 
 development:
-  primary:
-    <<: *default
-    database: auto_reconcile_development
-  cache:
-    <<: *default
-    database: auto_reconcile_development_cache
-    migrations_paths: db/cache_migrate
-  queue:
-    <<: *default
-    database: auto_reconcile_development_queue
-    migrations_paths: db/queue_migrate
-  cable:
-    <<: *default
-    database: auto_reconcile_development_cable
-    migrations_paths: db/cable_migrate
+  <<: *default
+  database: auto_reconcile_development
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -71,18 +58,5 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
-  primary: &primary_production
-    <<: *default
-    url: <%= ENV["DATABASE_URL"] %>
-  cache:
-    <<: *primary_production
-    url: <%= ENV.fetch("CACHE_DATABASE_URL") { ENV["DATABASE_URL"] } %>
-    migrations_paths: db/cache_migrate
-  queue:
-    <<: *primary_production
-    url: <%= ENV.fetch("QUEUE_DATABASE_URL") { ENV["DATABASE_URL"] } %>
-    migrations_paths: db/queue_migrate
-  cable:
-    <<: *primary_production
-    url: <%= ENV.fetch("CABLE_DATABASE_URL") { ENV["DATABASE_URL"] } %>
-    migrations_paths: db/cable_migrate
+  <<: *default
+  url: <%= ENV["DATABASE_URL"] %>
