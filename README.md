@@ -5,7 +5,7 @@ A minimal financial reconciliation web app. Configure data sources, import CSVs 
 ## Stack
 
 - Rails 8.1 (Ruby 3.4.9 via `mise`)
-- PostgreSQL 17 — 4 logical DBs in production (primary, cache, queue, cable)
+- PostgreSQL 17 (single DB; Solid Queue / Cache / Cable tables live alongside the app's tables)
 - SolidQueue (background jobs), Solid Cache, Solid Cable
 - Hotwire (Turbo + Stimulus), importmap, Tailwind via cssbundling
 - Active Storage on local disk (v1)
@@ -15,7 +15,7 @@ A minimal financial reconciliation web app. Configure data sources, import CSVs 
 ```bash
 mise install                 # Ruby 3.4.9
 bundle install
-bin/rails db:prepare         # creates all 4 dev DBs and runs migrations
+bin/rails db:prepare         # creates the dev DB and runs migrations
 bin/rails db:fixtures:load   # seeds a demo workspace, user, and 2 data sources
 bin/dev                      # boots web + tailwind watcher + SolidQueue worker
 ```
@@ -42,33 +42,22 @@ This app is set up for a **single-container** Railway deployment: web (Puma) and
 ### 1. Create the Railway project
 
 - New project → "Deploy from GitHub repo" → pick this repo.
-- Add a Postgres service to the project. Railway will auto-link its `DATABASE_URL` to your web service.
+- Add a Postgres service to the project.
 
-### 2. Create the 3 extra logical databases
-
-Open the Postgres service's "Data" tab → "Query" (or use `psql` with the public URL) and run:
-
-```sql
-CREATE DATABASE auto_reconcile_production_cache;
-CREATE DATABASE auto_reconcile_production_queue;
-CREATE DATABASE auto_reconcile_production_cable;
-```
-
-### 3. Set env vars on the web service
+### 2. Set env vars on the web service
 
 | Variable | Value |
 | --- | --- |
 | `RAILS_MASTER_KEY` | Contents of your local `config/master.key` |
-| `DATABASE_URL` | Auto-linked from the Postgres service |
-| `CACHE_DATABASE_URL` | Same as `DATABASE_URL` but with the DB name replaced by `auto_reconcile_production_cache` |
-| `QUEUE_DATABASE_URL` | Same, with `..._queue` |
-| `CABLE_DATABASE_URL` | Same, with `..._cable` |
+| `DATABASE_URL` | The **public** Postgres URL from the Postgres service's "Connect" tab (the one ending in `.proxy.rlwy.net:<port>`, not `postgres.railway.internal`). Solid Queue / Cache / Cable tables live in this same DB. |
 | `SOLID_QUEUE_IN_PUMA` | `1` |
 | `APP_HOST` | Optional — your custom domain (Railway's `*.up.railway.app` is already allowed) |
 
-### 4. Deploy and smoke-test
+> **Why the public URL?** Railway's private hostname `postgres.railway.internal` only resolves over IPv6 on the project's private network and has known boot-time DNS-warm-up races that crash the SolidQueue dispatcher (`could not translate host name … Temporary failure in name resolution`). The public URL goes over Railway's TCP proxy with TLS — slightly more latency, much less to debug. If you need private networking later, enable it on both services and switch back.
 
-- Railway will build the Dockerfile and `bin/docker-entrypoint` runs `db:prepare` against all 4 DBs on boot.
+### 3. Deploy and smoke-test
+
+- Railway will build the Dockerfile and `bin/docker-entrypoint` runs `db:prepare` on boot.
 - `curl https://<app>.up.railway.app/up` should return 200.
 - Walk the 3-step flow in the browser. If the SolidQueue worker is running correctly, ImportBatchJob and ReconciliationRunJob will execute and you'll see results.
 
