@@ -43,6 +43,27 @@ module Reconciliation
       assert_equal 1, stats[:source_a_unmatched]
     end
 
+    test "does not double count source rows across multiple tiers" do
+      exact_tier = FakeTier.new(
+        unique_candidates: [],
+        ambiguous_groups: [],
+        source_a_count: 3,
+        candidates_evaluated: 2
+      )
+      heuristic_tier = FakeTier.new(
+        unique_candidates: [],
+        ambiguous_groups: [],
+        source_a_count: 2,
+        candidates_evaluated: 4
+      )
+
+      stats = MatchingPipeline.new(nil, tiers: [ exact_tier, heuristic_tier ], committer: FakeCommitter.new).call
+
+      assert_equal 3, stats[:source_a_in_window]
+      assert_equal 6, stats[:candidates_evaluated]
+      assert_equal 3, stats[:source_a_unmatched]
+    end
+
     class FakeTier
       def initialize(unique_candidates:, ambiguous_groups:, source_a_count:, candidates_evaluated:)
         @result = TierResult.new(
@@ -66,7 +87,7 @@ module Reconciliation
         @calls = []
       end
 
-      def commit_exact_candidate(candidate)
+      def commit_candidate(candidate)
         @calls << [ :match, candidate ]
         @match_result
       end

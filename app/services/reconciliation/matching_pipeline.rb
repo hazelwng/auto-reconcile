@@ -2,7 +2,7 @@ module Reconciliation
   class MatchingPipeline
     def initialize(reconciliation_run, tiers: nil, committer: nil)
       @run = reconciliation_run
-      @tiers = tiers || [ ExactTier.new(reconciliation_run) ]
+      @tiers = tiers || [ ExactTier.new(reconciliation_run), HeuristicTier.new(reconciliation_run) ]
       @committer = committer || MatchCommitter.new(reconciliation_run)
     end
 
@@ -15,7 +15,7 @@ module Reconciliation
         merge_tier_stats!(stats, result)
 
         result.unique_candidates.each do |candidate|
-          merge_commit_result!(stats, @committer.commit_exact_candidate(candidate))
+          merge_commit_result!(stats, @committer.commit_candidate(candidate))
         end
 
         final_ambiguous_groups.concat(result.ambiguous_groups)
@@ -47,7 +47,7 @@ module Reconciliation
     end
 
     def merge_tier_stats!(stats, result)
-      stats[:source_a_in_window] += result.source_a_count
+      stats[:source_a_in_window] = result.source_a_count if stats[:source_a_in_window].zero?
       stats[:candidates_evaluated] += result.candidates_evaluated
     end
 

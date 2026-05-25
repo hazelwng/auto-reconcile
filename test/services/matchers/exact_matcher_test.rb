@@ -75,33 +75,49 @@ module Matchers
       assert_equal 1, stats[:matches_created]
     end
 
-    test "B occurred_on 8 days after A is outside window - not a candidate" do
+    test "B occurred_on 8 days after A falls through to heuristic tier" do
       a = make_invoice(external: "inv-1", amount_cents: 5_000, occurred_on: Date.new(2026, 4, 1))
-      make_bank(external: "bk-1", amount_cents: 5_000, occurred_on: Date.new(2026, 4, 9))
+      b = make_bank(external: "bk-1", amount_cents: 5_000, occurred_on: Date.new(2026, 4, 9))
 
       stats = ExactMatcher.new(@run).call
-      assert_equal 0, stats[:matches_created]
-      assert_equal 1, stats[:source_a_unmatched]
-      assert_equal "unmatched", a.reload.status
+      assert_equal 1, stats[:matches_created]
+      assert_equal 0, stats[:source_a_unmatched]
+      assert_equal "proposed", a.reload.status
+      assert_equal "proposed", b.reload.status
+      assert_equal "heuristic", Match.last.method
     end
 
-    test "B occurred_on before A is not a candidate (one-directional date window)" do
+    test "B occurred_on before A falls through to heuristic tier" do
       a = make_invoice(external: "inv-1", amount_cents: 5_000, occurred_on: Date.new(2026, 4, 10))
-      make_bank(external: "bk-1", amount_cents: 5_000, occurred_on: Date.new(2026, 4, 9))
+      b = make_bank(external: "bk-1", amount_cents: 5_000, occurred_on: Date.new(2026, 4, 9))
 
       stats = ExactMatcher.new(@run).call
-      assert_equal 0, stats[:matches_created]
-      assert_equal 1, stats[:source_a_unmatched]
-      assert_equal "unmatched", a.reload.status
+      assert_equal 1, stats[:matches_created]
+      assert_equal 0, stats[:source_a_unmatched]
+      assert_equal "proposed", a.reload.status
+      assert_equal "proposed", b.reload.status
+      assert_equal "heuristic", Match.last.method
     end
 
-    test "amount mismatch is not a candidate" do
+    test "amount differs by 1 cent falls through to heuristic tier" do
       make_invoice(external: "inv-1", amount_cents: 10_000, occurred_on: Date.new(2026, 4, 1))
       make_bank(external: "bk-1", amount_cents: 10_001, occurred_on: Date.new(2026, 4, 1))
 
       stats = ExactMatcher.new(@run).call
-      assert_equal 0, stats[:matches_created]
-      assert_equal 1, stats[:source_a_unmatched]
+      assert_equal 1, stats[:matches_created]
+      assert_equal 0, stats[:source_a_unmatched]
+      assert_equal "heuristic", Match.last.method
+      assert_in_delta 0.85, Match.last.confidence.to_f, 1e-6
+    end
+
+    test "amount within capped percentage uses lower heuristic confidence" do
+      make_invoice(external: "inv-1", amount_cents: 100_000, occurred_on: Date.new(2026, 4, 1))
+      make_bank(external: "bk-1", amount_cents: 100_400, occurred_on: Date.new(2026, 4, 1))
+
+      stats = ExactMatcher.new(@run).call
+      assert_equal 1, stats[:matches_created]
+      assert_equal "heuristic", Match.last.method
+      assert_in_delta 0.70, Match.last.confidence.to_f, 1e-6
     end
 
     test "currency mismatch is not a candidate" do

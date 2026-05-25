@@ -5,15 +5,17 @@ module Reconciliation
       @workspace = reconciliation_run.workspace
     end
 
-    def commit_exact_candidate(candidate)
+    def commit_candidate(candidate)
       with_locked_items(candidate.item_ids) do |items_by_id|
         a = items_by_id.fetch(candidate.source_a_item_id)
         b = items_by_id.fetch(candidate.source_b_item_id)
 
-        commit_exact_match(a, b)
+        commit_match(candidate, a, b)
         { kind: :matched }
       end
     end
+
+    alias_method :commit_exact_candidate, :commit_candidate
 
     def commit_ambiguity(group)
       with_locked_items(group.item_ids) do |items_by_id|
@@ -37,14 +39,14 @@ module Reconciliation
       end
     end
 
-    def commit_exact_match(a, b)
+    def commit_match(candidate, a, b)
       match = Match.create!(
         reconciliation_run: @run,
         workspace: @workspace,
-        method: "exact",
+        method: candidate.matched_on.fetch(:method),
         status: "proposed",
-        confidence: 1.0,
-        reasoning: "Exact match: amount #{format_money(a)}, " \
+        confidence: candidate.matched_on.fetch(:confidence),
+        reasoning: "#{candidate.matched_on.fetch(:method).capitalize} match: amount #{format_money(a)}, " \
                    "A (invoice) #{a.occurred_on} → B (bank) #{b.occurred_on}"
       )
       MatchLeg.create!(
