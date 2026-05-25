@@ -2,7 +2,8 @@ module Reconciliation
   class MatchingPipeline
     def initialize(reconciliation_run, tiers: nil, committer: nil)
       @run = reconciliation_run
-      @tiers = tiers || [ ExactTier.new(reconciliation_run), HeuristicTier.new(reconciliation_run) ]
+      @policy = CountryPolicy.for(reconciliation_run.workspace.country_code) if reconciliation_run
+      @tiers = tiers || default_tiers
       @committer = committer || MatchCommitter.new(reconciliation_run)
     end
 
@@ -32,6 +33,13 @@ module Reconciliation
     end
 
     private
+
+    def default_tiers
+      [
+        ExactTier.new(@run, policy: @policy),
+        HeuristicTier.new(@run, policy: @policy)
+      ]
+    end
 
     def empty_stats
       {

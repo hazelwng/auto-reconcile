@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_16_111605) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_25_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -243,6 +243,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_16_111605) do
 
   create_table "workspaces", force: :cascade do |t|
     t.string "base_currency", default: "USD", null: false
+    t.string "country_code", default: "AU", null: false
     t.datetime "created_at", null: false
     t.string "name", null: false
     t.jsonb "settings", default: {}, null: false

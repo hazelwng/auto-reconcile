@@ -2,4 +2,5 @@ demo:
   name: Demo Co
   slug: demo-co
   base_currency: AUD
+  country_code: AU
   settings: {}
