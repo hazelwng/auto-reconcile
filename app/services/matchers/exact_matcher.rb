@@ -32,29 +32,7 @@ module Matchers
 
     def call
       validate_run!
-      stats = empty_stats
-
-      candidate_result = Reconciliation::CandidateFinder.new(@run).call
-      stats[:source_a_in_window] = candidate_result.source_a_count
-      return stats if candidate_result.source_a_count.zero?
-
-      stats[:candidates_evaluated] = candidate_result.candidates.size
-
-      uniqueness_result = Reconciliation::UniquenessChecker.new(candidate_result.candidates).call
-      committer = Reconciliation::MatchCommitter.new(@run)
-
-      uniqueness_result.unique_candidates.each do |candidate|
-        merge_result!(stats, committer.commit_exact_candidate(candidate))
-      end
-
-      uniqueness_result.ambiguous_groups.each do |group|
-        merge_result!(stats, committer.commit_ambiguity(group))
-      end
-
-      stats[:source_a_unmatched] = stats[:source_a_in_window] -
-                                   stats[:source_a_matched] -
-                                   stats[:source_a_exceptions]
-      stats
+      Reconciliation::MatchingPipeline.new(@run).call
     end
 
     private
@@ -76,31 +54,6 @@ module Matchers
       end
       unless @run.source_b.kind == "bank"
         raise ArgumentError, "source_b.kind must be 'bank' (got #{@run.source_b.kind.inspect})"
-      end
-    end
-
-    def empty_stats
-      {
-        candidates_evaluated: 0,
-        matches_created: 0,
-        exceptions_created: 0,
-        ambiguity_groups_created: 0,
-        source_a_in_window: 0,
-        source_a_matched: 0,
-        source_a_exceptions: 0,
-        source_a_unmatched: 0
-      }
-    end
-
-    def merge_result!(stats, result)
-      case result[:kind]
-      when :matched
-        stats[:matches_created] += 1
-        stats[:source_a_matched] += 1
-      when :ambiguous
-        stats[:ambiguity_groups_created] += 1
-        stats[:exceptions_created] += result[:items_count]
-        stats[:source_a_exceptions] += result[:source_a_count]
       end
     end
   end
