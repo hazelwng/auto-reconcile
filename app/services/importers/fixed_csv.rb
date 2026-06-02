@@ -75,6 +75,7 @@ module Importers
           currency: currency,
           status: row["status"].presence || "open",
           payer: row["payer"],
+          payer_kana: row["payer_kana"],
           notes: row["notes"]
         )
 

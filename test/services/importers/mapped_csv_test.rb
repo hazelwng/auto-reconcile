@@ -142,11 +142,12 @@ module Importers
         "due_date"       => "DueOn",
         "amount"         => "Total",
         "payer"          => "Customer",
+        "payer_kana"     => "CustomerKana",
         "status"         => "Status"
       })
       attach_csv(@invoice_batch, <<~CSV)
-        InvoiceID,Number,IssuedOn,DueOn,Total,Customer,Status
-        inv-1,INV-9001,2026-04-01,2026-05-01,500.00,Acme,open
+        InvoiceID,Number,IssuedOn,DueOn,Total,Customer,CustomerKana,Status
+        inv-1,INV-9001,2026-04-01,2026-05-01,500.00,Acme,アクメ,open
       CSV
 
       assert_difference -> { Invoice.count } => 1,
@@ -162,6 +163,7 @@ module Importers
       assert_equal "INV-9001", inv.invoice_number
       assert_equal Date.new(2026, 5, 1), inv.due_date
       assert_equal "Acme", inv.payer
+      assert_equal "アクメ", inv.payer_kana
       assert_equal "open", inv.status
     end
 
