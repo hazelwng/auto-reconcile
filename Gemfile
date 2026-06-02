@@ -43,7 +43,7 @@ gem "thruster", require: false
 gem "image_processing", "~> 1.2"
 
 # Money objects + ActiveRecord helpers (monetize :amount_cents)
-gem "money-rails", "~> 1.15"
+gem "money-rails", "~> 3.0"
 
 # Soft delete (.discard / .undiscard / .kept / .discarded)
 gem "discard", "~> 1.3"
