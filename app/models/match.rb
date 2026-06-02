@@ -1,7 +1,7 @@
 class Match < ApplicationRecord
   include Discard::Model
 
-  METHODS = %w[exact rule embedding llm manual].freeze
+  METHODS = %w[exact heuristic rule embedding llm manual].freeze
   STATUSES = %w[proposed confirmed rejected].freeze
 
   belongs_to :reconciliation_run
