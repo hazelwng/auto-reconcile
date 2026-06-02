@@ -59,8 +59,8 @@ module Importers
 
     test "accounting kind: creates Invoice + ReconcilableItem with parsed fields" do
       attach_csv(@invoice_batch, <<~CSV)
-        external_id,invoice_number,issue_date,due_date,amount,status,payer,notes,description
-        i-001,INV-1001,2026-04-01,2026-05-01,500.00,open,Acme,first invoice,Acme inv
+        external_id,invoice_number,issue_date,due_date,amount,status,payer,payer_kana,notes,description
+        i-001,INV-1001,2026-04-01,2026-05-01,500.00,open,Acme,アクメ,first invoice,Acme inv
       CSV
 
       assert_difference -> { Invoice.count } => 1,
@@ -79,6 +79,7 @@ module Importers
       assert_equal Date.new(2026, 5, 1), inv.due_date
       assert_equal "open", inv.status
       assert_equal "Acme", inv.payer
+      assert_equal "アクメ", inv.payer_kana
     end
 
     test "amount parsing handles thousands separators and currency symbol" do

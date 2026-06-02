@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_24_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_01_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -95,7 +95,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_24_000001) do
     t.bigint "data_source_id", null: false
     t.integer "duplicate_count", default: 0, null: false
     t.integer "error_count", default: 0, null: false
-    t.jsonb "error_log", default: {}, null: false
+    t.jsonb "error_log", default: [], null: false
     t.integer "processed_count", default: 0, null: false
     t.integer "row_count", default: 0, null: false
     t.datetime "started_at"
@@ -116,6 +116,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_24_000001) do
     t.date "issue_date", null: false
     t.text "notes"
     t.string "payer"
+    t.string "payer_kana"
     t.string "status", default: "open", null: false
     t.bigint "total_cents", null: false
     t.datetime "updated_at", null: false
@@ -385,6 +386,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_24_000001) do
 
   create_table "workspaces", force: :cascade do |t|
     t.string "base_currency", default: "USD", null: false
+    t.string "country_code", default: "DEFAULT", null: false
     t.datetime "created_at", null: false
     t.string "name", null: false
     t.jsonb "settings", default: {}, null: false

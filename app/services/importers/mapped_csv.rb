@@ -102,6 +102,7 @@ module Importers
           currency: currency,
           status: pick(row, mapping, "status").presence || "open",
           payer: pick(row, mapping, "payer"),
+          payer_kana: pick(row, mapping, "payer_kana"),
           notes: pick(row, mapping, "notes")
         )
 
