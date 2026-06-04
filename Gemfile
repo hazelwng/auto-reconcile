@@ -46,7 +46,7 @@ gem "image_processing", "~> 1.2"
 gem "money-rails", "~> 1.15"
 
 # Soft delete (.discard / .undiscard / .kept / .discarded)
-gem "discard", "~> 1.3"
+gem "discard", "~> 2.0"
 
 # Bundled-gems in Ruby 3.4+ — must be declared explicitly
 gem "csv"
